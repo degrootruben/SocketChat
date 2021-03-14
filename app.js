@@ -5,27 +5,17 @@ const app = express();
 const httpServer = require("http").createServer(app);
 const io = require("socket.io")(httpServer, {
     cors: {
-        origin: "http://localhost:" + PORT,
+        origin: "http://localhost:3000",
     }
 });
 
-let usernames = [];
+if (process.env.NODE_ENV === "production") {
+    
+}
 
-app.use(express.static("public", { root: __dirname }));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-app.get("/", (req, res) => {
-    res.status(200).sendFile("./index.html");
-});
-
-io.on("connection", socket => {
-    socket.on("setUsername", data => {
-        usernames[socket.id] = data;
-    });
-        
-    socket.on("sendMessage", data => {
-        io.sockets.emit("displayMessage", { message: data.message, username: usernames[data.userID] });
+io.on("connection", socket => {  
+    socket.on("message", ({ message, username }) => {
+        io.sockets.emit("message", { message, username });
     });
 });
 
