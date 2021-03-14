@@ -5,12 +5,14 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 const httpServer = require("http").createServer(app);
 
+let io;
+
 if (process.env.NODE_ENV === "production") {
-    const io = require("socket.io")(httpServer);
+    io = require("socket.io")(httpServer);
 } else {
-    const io = require("socket.io")(httpServer, {
+    io = require("socket.io")(httpServer, {
         cors: {
-            origin: process.env.CLIENT_ADDRESS,
+            origin: "http://localhost:3000",
         }
     });
 }
