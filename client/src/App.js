@@ -4,7 +4,8 @@ import { Grid, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActio
 import { makeStyles } from "@material-ui/core/styles";
 import io from "socket.io-client";
 
-const socket = io.connect("http://localhost:8000");
+const socket = io.connect();
+// const socket = io.connect("http://localhost:8000"); USE FOR DEV
 
 const useStyles = makeStyles((theme) => ({
   grid: {
