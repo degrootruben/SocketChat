@@ -51,14 +51,22 @@ export default function App() {
     if (e.keyCode) {
       if (e.keyCode === 13) {
         if (username) {
-          setOpen(!open);
+          if (username.length > 10) {
+            setUsernameMessage("Usernames can have a maximum of 10 characters!");
+          } else {
+            setOpen(false);
+          }
         } else {
           setUsernameMessage("Please enter a username!");
         }
       }
     } else {
       if (username) {
-        setOpen(!open);
+        if (username.length > 10) {
+          setUsernameMessage("Usernames can have a maximum of 10 characters!");
+        } else {
+          setOpen(false);
+        }
       } else {
         setUsernameMessage("Please enter a username!");
       }
