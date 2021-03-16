@@ -1,8 +1,8 @@
-import React from "react";
 import { useState, useEffect } from "react";
-import { Grid, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@material-ui/core";
+import { Grid, Paper, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import io from "socket.io-client";
+import UsernameDialog from "./components/UsernameDialog";
 
 let socket;
 
@@ -76,29 +76,13 @@ export default function App() {
     }
   }
 
+  const handleChange = (e) => {
+    setUsername(e.target.value);
+  }
+
   return (
     <div className="App">
-      {/* Username dialog */}
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" disableBackdropClick={true}>
-        <DialogTitle id="form-dialog-title">{usernameMessage}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            fullWidth
-            onKeyDown={handleClose}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <UsernameDialog handleClose={handleClose} open={open} usernameMessage={usernameMessage} username={username} handleChange={handleChange} />
 
       {/* Chat view */}
       <Grid
