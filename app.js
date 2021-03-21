@@ -4,9 +4,11 @@ const path = require("path");
 const PORT = process.env.PORT || 8000;
 const app = express();
 const httpServer = require("http").createServer(app);
+const cors = require("cors");
+
+const apiRoutes = require("./routes/apiRoutes");
 
 let io;
-
 if (process.env.NODE_ENV === "production") {
     io = require("socket.io")(httpServer);
 
@@ -21,6 +23,10 @@ if (process.env.NODE_ENV === "production") {
         }
     });
 }
+
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 io.on("connection", socket => {
     socket.on("message", ({ message, username }) => {
