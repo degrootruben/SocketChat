@@ -1,17 +1,18 @@
-import { Paper, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import ChatField from "./ChatField";
+import ContentWrapper from "./ContentWrapper";
 import MessageField from "./MessageField";
 
-const ChatView = ({paperClassName, chatFieldClassName, messageFieldClassName, chat, message, setMessage, handleMessage}) => {
+const ChatView = ({classes, chat, message, setMessage, handleMessage}) => {
     return (
-        <Paper className={paperClassName}>
+        <ContentWrapper classes={classes}>
             <Grid item xs={12}>
-                <ChatField className={chatFieldClassName} chat={chat} />
+                <ChatField className={classes.chatField} chat={chat} />
             </Grid>
             <Grid item xs={12}>
-                <MessageField className={messageFieldClassName} message={message} setMessage={setMessage} handleMessage={handleMessage} />
+                <MessageField className={classes.messageField} message={message} setMessage={setMessage} handleMessage={handleMessage} />
             </Grid>
-        </Paper>
+        </ContentWrapper>
     );
 }
 

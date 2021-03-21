@@ -9,18 +9,16 @@ let io;
 
 if (process.env.NODE_ENV === "production") {
     io = require("socket.io")(httpServer);
-} else {
+
+    app.use(express.static("client/build"));
+    app.get("*", (req, res) => {
+        res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+    });
+} else if (process.env.NODE_ENV === "development") {
     io = require("socket.io")(httpServer, {
         cors: {
             origin: "http://localhost:3000",
         }
-    });
-}
-
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static("client/build"));
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
     });
 }
 
@@ -29,6 +27,8 @@ io.on("connection", socket => {
         io.sockets.emit("message", { message, username });
     });
 });
+
+app.use("/api", apiRoutes);
 
 httpServer.listen(PORT, () => {
     console.log("Listening on port " + PORT + "!");
