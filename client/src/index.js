@@ -1,8 +1,9 @@
-import { ThemeProvider, createMuiTheme } from "@material-ui/core";
-import { purple } from "@material-ui/core/colors";
-import CssBaseLine from "@material-ui/core/CssBaseline";
 import React from "react";
 import ReactDOM from "react-dom";
+import { ThemeProvider, createMuiTheme } from "@material-ui/core";
+import { purple } from "@material-ui/core/colors";
+import "./index.css";
+import CssBaseLine from "@material-ui/core/CssBaseline";
 import App from "./App";
 
 const theme = createMuiTheme({

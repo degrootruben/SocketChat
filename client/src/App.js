@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Grid, Paper, TextField } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import io from "socket.io-client";
 import UsernameDialog from "./components/UsernameDialog";
+import ChatView from "./components/ChatView";
 
 let socket;
 
@@ -21,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     textAlign: "center",
     width: "65%",
-    marginTop: "5%"
+    marginTop: "5px"
   },
   chatField: {
     width: "100%",
@@ -50,26 +51,22 @@ export default function App() {
   const handleClose = (e) => {
     if (e.keyCode) {
       if (e.keyCode === 13) {
-        if (username) {
-          if (username.length > 10) {
-            setUsernameMessage("Usernames can have a maximum of 10 characters!");
-          } else {
-            setOpen(false);
-          }
-        } else {
-          setUsernameMessage("Please enter a username!");
-        }
+        checkAndSetUsername();
       }
     } else {
-      if (username) {
-        if (username.length > 10) {
-          setUsernameMessage("Usernames can have a maximum of 10 characters!");
-        } else {
-          setOpen(false);
-        }
+      checkAndSetUsername();
+    }
+  }
+
+  const checkAndSetUsername = () => {
+    if (username) {
+      if (username.length > 20) {
+        setUsernameMessage("Usernames can have a maximum of 20 characters!");
       } else {
-        setUsernameMessage("Please enter a username!");
+        setOpen(false);
       }
+    } else {
+      setUsernameMessage("Please enter a username!");
     }
   }
 
@@ -90,7 +87,14 @@ export default function App() {
 
   return (
     <div className="App">
-      <UsernameDialog handleClose={handleClose} open={open} usernameMessage={usernameMessage} username={username} handleChange={handleChange} />
+      {/* Input username dialog */}
+      <UsernameDialog 
+        handleClose={handleClose} 
+        open={open} 
+        usernameMessage={usernameMessage} 
+        username={username} 
+        handleChange={handleChange} 
+      />
 
       {/* Chat view */}
       <Grid
@@ -101,22 +105,15 @@ export default function App() {
         justify="center"
       >
         <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            <Grid item xs={12}>
-              <TextField
-                className={classes.chatField}
-                id="outlined-multiline-static"
-                multiline
-                rows={25}
-                variant="outlined"
-                InputProps={{ readOnly: true }}
-                value={chat}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField className={classes.messageField} label="Message" value={message} onChange={(e) => setMessage(e.target.value)} variant="outlined" onKeyDown={handleMessage} />
-            </Grid>
-          </Paper>
+          <ChatView
+            paperClassName={classes.paper}
+            chatFieldClassName={classes.chatField}
+            messageFieldClassName={classes.messageField}
+            chat={chat}
+            message={message}
+            setMessage={setMessage}
+            handleMessage={handleMessage}
+          />
         </Grid>
       </Grid>
     </div>);
