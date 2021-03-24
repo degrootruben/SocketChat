@@ -11,25 +11,25 @@ module.exports.loginUser = async (req, res) => {
         db.userExists(username, async (error, exists) => {
             if (error) {
                 console.error(error);
-                res.status(500).json({ error: "Database query created an error!" });
+                res.status(500).json({ error: "An error occured while querying database" });
             }
             if (exists == true) {
                 db.getHashedPassword(username, async (error, hashedPassword) => {
                     if (error) {
                         console.error(error);
-                        res.status(500).json({ error: "Database query created an error!" });
+                        res.status(500).json({ error: "An error occured while querying database" });
                     }
 
                     const match = await bcrypt.compare(password, hashedPassword);
-
                     if (match) {
-                        db.getUserId(username, hashedPassword, (error, userId) => {
+                        db.getUserId(username, hashedPassword, (error, id) => {
                             if (error) {
-                                res.status(500).json({ error: "An error occured while querying database"});
+                                console.error(error);
+                                res.status(500).json({ error: "An error occured while querying database" });
                             }
-                            const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-                            res.cookie("jwt", token);
+                            const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 259200 });
+                            res.cookie("JWT", token, { httpOnly: true, maxAge: 259200 * 1000 });
                             res.status(200).json({ message: `User ${username} succesfully logged in!` });
                         });
                     } else {
@@ -53,7 +53,7 @@ module.exports.registerUser = async (req, res) => {
         db.userExists(username, async (error, userExists) => {
             if (error) {
                 console.error(error);
-                res.status(500).json({ error: "Database query created an error!" });
+                res.status(500).json({ error: "An error occured while querying database" });
             }
             if (userExists) {
                 res.status(400).json({ error: `Username '${username}' already in use!` });
@@ -64,15 +64,29 @@ module.exports.registerUser = async (req, res) => {
                 db.saveUser({ username, hashedPassword }, (error, user) => {
                     if (error) {
                         console.error(error);
-                        res.status(500).json({ error: "Database query created an error!" });
-                    } else {
-                        res.status(200).json({ message: `Created user ${username}!`, data: user });
+                        res.status(500).json({ error: "An error occured while querying database" });
                     }
+                    db.getUserId(username, hashedPassword, (error, id) => {
+                        if (error) {
+                            console.error(error);
+                            res.status(500).json({ error: "An error occured while querying database" });
+                        }
+
+                        const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 259200 });
+                        res.cookie("JWT", token, { httpOnly: true, maxAge: 259200 * 1000 });
+                        res.status(200).json({ message: `Created user ${username}!`, data: user });
+                    });
+
                 });
             }
         });
     } else {
         res.json({ error: "Username and/or password was not submitted!" });
     }
+}
+
+module.exports.logoutUser = (req, res) => {
+    res.cookie("JWT", "", { maxAge: 1 });
+    res.json({ message: "User logged out!" });
 }
 

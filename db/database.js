@@ -28,7 +28,7 @@ module.exports.getHashedPassword = (username, callback) => {
 }
 
 module.exports.getUserId = (username, hashedPassword, callback) => {
-    pool.query("SELECT id FROM users WHERE username = $1 AND password = $2", [username, hashedPassword], (error, response) => {
+    pool.query("SELECT id FROM users WHERE username = $1 AND password = $2", [username, hashedPassword], (error, id) => {
         if (error) {
             callback(error, null);
             return;
@@ -45,7 +45,7 @@ module.exports.saveUser = ({ username, hashedPassword }, callback) => {
             callback(error, null);
             return;
         } else {
-            callback(null, { userid: response.rows[0].userid, username: response.rows[0].username });
+            callback(null, { id: response.rows[0].id, username: response.rows[0].username });
         }
     });
 }
