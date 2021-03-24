@@ -1,13 +1,10 @@
 const express = require("express");
+const authenticationController = require("../controllers/authenticationController");
 
 const router = express.Router();
 
-router.post("/login", (req, res) => {
-    if (req.body.username && req.body.password) {
-        res.status(200).send({ message: "Succesfully posted username and password" });
-    } else {
-        res.status(400).send({ error: "Error: no username or password was submitted" });
-    }
-});
+// Authentication
+router.post("/login", authenticationController.loginUser);
+router.post("/register", authenticationController.registerUser);
 
 module.exports = router;
