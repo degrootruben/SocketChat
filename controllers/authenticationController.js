@@ -1,32 +1,26 @@
-const { Client } = require("pg");
 const bcrypt = require("bcrypt");
+const db = require("../db/database");
+const jwt = require("jsonwebtoken");
 
-const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
-
-client.connect();
+db.connect();
 
 module.exports.loginUser = async (req, res) => {
     const { username, password } = req.body;
 
     if (username && password) {
-        client.query("SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)", [username], async (error, response) => {
+        db.userExists(username, async (error, exists) => {
             if (error) {
                 console.error(error);
                 res.status(500).json({ error: "Database query created an error!" });
             }
-            if (response.rows[0].exists == true) {
-                client.query("SELECT password FROM users WHERE username = $1", [username], async (error, response) => {
+            if (exists == true) {
+                db.getHashedPassword(username, async (error, hashedPassword) => {
                     if (error) {
                         console.error(error);
                         res.status(500).json({ error: "Database query created an error!" });
                     }
 
-                    const match = await bcrypt.compare(password, response.rows[0].password);
+                    const match = await bcrypt.compare(password, hashedPassword);
 
                     if (match) {
                         res.status(200).json({ message: `User ${username} succesfully logged in!` });
@@ -48,24 +42,23 @@ module.exports.registerUser = async (req, res) => {
     const { username, password } = req.body;
 
     if (username && password) {
-        client.query("SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)", [username], async (error, response) => {
+        db.userExists(username, async (error, userExists) => {
             if (error) {
                 console.error(error);
                 res.status(500).json({ error: "Database query created an error!" });
             }
-            if (response.rows[0].exists == true) {
+            if (userExists) {
                 res.status(400).json({ error: `Username '${username}' already in use!` });
             } else {
                 const salt = await bcrypt.genSalt(6);
                 const hashedPassword = await bcrypt.hash(password, salt);
 
-                client.query("INSERT INTO users(username, password) VALUES($1, $2) RETURNING *", [username, hashedPassword], (error, response) => {
+                db.saveUser({ username, hashedPassword }, (error, user) => {
                     if (error) {
                         console.error(error);
                         res.status(500).json({ error: "Database query created an error!" });
                     } else {
-                        console.log(response);
-                        res.status(200).json({ message: `Created user ${username}!`, data: { userid: response.rows[0].userid, username: response.rows[0].username } });
+                        res.status(200).json({ message: `Created user ${username}!`, data: user });
                     }
                 });
             }
