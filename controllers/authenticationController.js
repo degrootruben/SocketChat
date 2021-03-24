@@ -23,7 +23,15 @@ module.exports.loginUser = async (req, res) => {
                     const match = await bcrypt.compare(password, hashedPassword);
 
                     if (match) {
-                        res.status(200).json({ message: `User ${username} succesfully logged in!` });
+                        db.getUserId(username, hashedPassword, (error, userId) => {
+                            if (error) {
+                                res.status(500).json({ error: "An error occured while querying database"});
+                            }
+                            const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
+                            res.cookie("jwt", token);
+                            res.status(200).json({ message: `User ${username} succesfully logged in!` });
+                        });
                     } else {
                         res.status(400).json({ error: "Password incorrect!" });
                     }
