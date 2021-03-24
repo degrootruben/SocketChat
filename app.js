@@ -11,11 +11,13 @@ const express = require("express");
 const PORT = process.env.PORT || 8000;
 const app = express();
 const httpsServer = require("https").createServer(options, app);
+
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 require("dotenv").config();
 
-const apiRoutes = require("./routes/apiRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 let io;
 if (process.env.NODE_ENV === "production") {
@@ -33,7 +35,8 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -43,7 +46,7 @@ io.on("connection", socket => {
     });
 });
 
-app.use("/api", apiRoutes);
+app.use("/api", authRoutes);
 
 httpsServer.listen(PORT, () => {
     console.log("Listening on port " + PORT + "!");

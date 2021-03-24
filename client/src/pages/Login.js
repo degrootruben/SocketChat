@@ -3,7 +3,7 @@ import { TextField, Grid, Button } from "@material-ui/core"
 import { useHistory } from "react-router-dom";
 import ContentWrapper from "../components/ContentWrapper";
 
-const Login = ({ classes, ENDPOINT }) => {
+const Login = ({ classes, endpoint }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -12,22 +12,26 @@ const Login = ({ classes, ENDPOINT }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if(username && password) {
-            const bodys = JSON.stringify({ username, password });
-            fetch(ENDPOINT + "api/login", {
+        if (username && password) {
+            const data = JSON.stringify({ username, password });
+            fetch(endpoint + "api/login", {
                 method: "POST",
+                mode: 'cors',
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: bodys
+                body: data
             }).then(response => response.json())
-            .then(data => {
-                if (!data.error) {
-                    history.push("/chat");
-                }
-                console.log(data);
-            })
-            .catch(error => console.error(error));
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error);
+                    } else {
+                        history.push("/chat");
+                    }
+                    console.log(data);
+                })
+                .catch(error => console.error(error));
         }
     }
 

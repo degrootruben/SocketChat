@@ -2,14 +2,27 @@ import { useState, useEffect } from "react";
 import UsernameDialog from "../components/UsernameDialog";
 import ChatView from "../components/ChatView";
 
-const ChatPage = ({ classes, socket }) => {
+const ChatPage = ({ classes, socket, endpoint, authorized, setAuthorized }) => {
     const [open, setOpen] = useState(true);
     const [username, setUsername] = useState("");
     const [usernameMessage, setUsernameMessage] = useState("What username do you want to use?");
     const [chat, setChat] = useState("");
     const [message, setMessage] = useState("");
+    
 
     useEffect(() => {
+        fetch(endpoint + "api/login", {
+            method: "GET",
+            credentials: "include"
+        }).then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                setAuthorized(data.loggedIn);
+            }
+        }).catch(error => console.error(error));
+
         socket.on("message", ({ message, username }) => {
             if (message && username)
                 setChat(chat + username + ": " + message + "\n");
@@ -55,21 +68,27 @@ const ChatPage = ({ classes, socket }) => {
 
     return (
         <div className="ChatPage">
-            <UsernameDialog
-                handleClose={handleClose}
-                open={open}
-                usernameMessage={usernameMessage}
-                username={username}
-                handleChange={handleChange}
-            />
 
-            <ChatView
-                classes={classes}
-                chat={chat}
-                message={message}
-                setMessage={setMessage}
-                handleMessage={handleMessage}
-            />
+            { authorized && 
+                <UsernameDialog
+                    handleClose={handleClose}
+                    open={open}
+                    usernameMessage={usernameMessage}
+                    username={username}
+                    handleChange={handleChange}
+                />
+
+                &&
+
+                <ChatView
+                    classes={classes}
+                    chat={chat}
+                    message={message}
+                    setMessage={setMessage}
+                    handleMessage={handleMessage}
+                />
+            }
+            { !authorized && <h1>Not authorized!</h1> }
         </div>
     );
 }

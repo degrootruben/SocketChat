@@ -28,7 +28,7 @@ module.exports.getHashedPassword = (username, callback) => {
 }
 
 module.exports.getUserId = (username, hashedPassword, callback) => {
-    pool.query("SELECT id FROM users WHERE username = $1 AND password = $2", [username, hashedPassword], (error, id) => {
+    pool.query("SELECT id FROM users WHERE username = $1 AND password = $2", [username, hashedPassword], (error, response) => {
         if (error) {
             callback(error, null);
             return;

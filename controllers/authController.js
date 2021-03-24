@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 db.connect();
 
-module.exports.loginUser = async (req, res) => {
+module.exports.loginPost = async (req, res) => {
     const { username, password } = req.body;
 
     if (username && password) {
@@ -30,12 +30,11 @@ module.exports.loginUser = async (req, res) => {
 
                             const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 259200 });
                             res.cookie("JWT", token, { httpOnly: true, maxAge: 259200 * 1000 });
-                            res.status(200).json({ message: `User ${username} succesfully logged in!` });
+                            res.status(200).json({ loggedIn: true, message: `User ${username} succesfully logged in!` });
                         });
                     } else {
                         res.status(400).json({ error: "Password incorrect!" });
                     }
-
                 });
             } else {
                 res.status(400).json({ error: "Username doens't exist!" });
@@ -46,7 +45,24 @@ module.exports.loginUser = async (req, res) => {
     }
 }
 
-module.exports.registerUser = async (req, res) => {
+module.exports.loginGet = (req, res) => {
+    if (req.cookies.JWT) {
+        const token = req.cookies.JWT;
+
+        jwt.verify(token, process.env.JWT_SECRET, (error, result) => {
+            if (error) {
+                res.status(401).json({ error: "You are not logged in or not authorized!", err: error });
+            } else {
+                res.status(200).json({ loggedIn: true, id: result.id, message: "User is logged in!" });
+            }
+        });
+    } else {
+        res.status(401).json({ error: "You are not logged in or not authorized!!!" });
+    }
+}
+
+
+module.exports.registerPost = async (req, res) => {
     const { username, password } = req.body;
 
     if (username && password) {
@@ -74,7 +90,7 @@ module.exports.registerUser = async (req, res) => {
 
                         const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 259200 });
                         res.cookie("JWT", token, { httpOnly: true, maxAge: 259200 * 1000 });
-                        res.status(200).json({ message: `Created user ${username}!`, data: user });
+                        res.status(200).json({ loggedIn: true, message: `Created user ${username}!`, data: user });
                     });
 
                 });
@@ -85,7 +101,7 @@ module.exports.registerUser = async (req, res) => {
     }
 }
 
-module.exports.logoutUser = (req, res) => {
+module.exports.logoutGet = (req, res) => {
     res.cookie("JWT", "", { maxAge: 1 });
     res.json({ message: "User logged out!" });
 }
