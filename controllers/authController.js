@@ -105,4 +105,3 @@ module.exports.logoutGet = (req, res) => {
     res.cookie("JWT", "", { maxAge: 1 });
     res.json({ message: "User logged out!" });
 }
-
